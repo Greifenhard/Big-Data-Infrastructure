@@ -12,6 +12,7 @@ npm run dev
 cd Express-React-web-app
 cd client
 npm start
+```
 
 3. start kafka-container
 ```bash
