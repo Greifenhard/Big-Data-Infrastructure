@@ -22,14 +22,14 @@ spark.sparkContext.setLogLevel('WARN')
 kafkaMessages = spark \
     .readStream \
     .format("kafka") \
-    .option("kafka.bootstrap.servers","localhost:2181") \
-    .option("subscribe", "tracking-data") \
+    .option("kafka.bootstrap.servers","localhost:9092") \
+    .option("subscribe", "nextjs-events") \
     .option("startingOffsets", "earliest") \
     .load()
 
 # Define schema of tracking data
 trackingMessageSchema = StructType() \
-    .add("mission", StringType()) \
+    .add("movieId", IntegerType()) \
     .add("timestamp", IntegerType())
 
 # Example Part 3
@@ -49,7 +49,7 @@ trackingMessages = kafkaMessages.select(
     # Select all JSON fields
     column("json.*")
 ) \
-    .withColumnRenamed('json.mission', 'mission') \
+    .withColumnRenamed('json.movieId', 'movieId') \
     .withWatermark("parsed_timestamp", windowDuration)
 
 # Example Part 4
@@ -60,7 +60,7 @@ popular = trackingMessages.groupBy(
         windowDuration,
         slidingDuration
     ),
-    column("mission")
+    column("movieId")
 ).count() \
  .withColumnRenamed('window.start', 'window_start') \
  .withColumnRenamed('window.end', 'window_end') \
@@ -73,22 +73,22 @@ consoleDump = popular \
     .format("console") \
     .start()
 
-# Example Part 6
+# # Example Part 6
 
 
-def saveToDatabase(batchDataframe, batchId):
-    global dbUrl, dbSchema, dbOptions
-    print(f"Writing batchID {batchId} to database @ {dbUrl}")
-    batchDataframe.distinct().write.jdbc(dbUrl, dbSchema, "overwrite", dbOptions)
+# def saveToDatabase(batchDataframe, batchId):
+#     global dbUrl, dbSchema, dbOptions
+#     print(f"Writing batchID {batchId} to database @ {dbUrl}")
+#     batchDataframe.distinct().write.jdbc(dbUrl, dbSchema, "overwrite", dbOptions)
 
 
-# Example Part 7
-dbInsertStream = popular \
-    .select(column('mission'), column('count')) \
-    .writeStream \
-    .outputMode("complete") \
-    .foreachBatch(saveToDatabase) \
-    .start()
+# # Example Part 7
+# dbInsertStream = popular \
+#     .select(column('mission'), column('count')) \
+#     .writeStream \
+#     .outputMode("complete") \
+#     .foreachBatch(saveToDatabase) \
+#     .start()
 
 # Wait for termination
 spark.streams.awaitAnyTermination()

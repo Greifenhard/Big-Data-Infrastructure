@@ -45,51 +45,14 @@ USER spark
 WORKDIR /app
 
 #------------------------------------
-# Prepare dependencies in ZIP file
-
-# Prefetch Maven dependencies by running an empty python file using spark-submit
-# to benefit from Docker's build cache
-#RUN echo -e 'IGNORE_THIS_ERROR' > /tmp/empty.py ; /opt/spark/bin/spark-submit --verbose \
-#	--conf "spark.jars.ivy=${IVY_PACKAGE_DIR}" \
-#	--packages "${EXTRA_PACKAGES}" \
-#	/tmp/empty.py ; rm -f /tmp/empty.py
-
-# Prepare the app's python dependencies
-#ADD --chown=spark:spark requirements.txt /app/
-#RUN pip install --no-cache-dir -t /app/dependencies -r requirements.txt
-#RUN echo -e "Contents of /app/dependencies:\n" ; find /app/dependencies
-
-# Zip all dependencies
-#WORKDIR /app/dependencies
-#RUN zip -r /app/dependencies.zip .
-
-#WORKDIR /app
-#RUN rm -rf /app/dependencies
-
-#------------------------------------
 # Copy the application code into the container
 
 # Copy application code
 COPY --chown=spark:spark *.py /app/
 
-#------------------------------------
-# Set entrypoint and use dependencies zip file
-
-# Use YARN deployment in client mode (requires Hadoop config)
-# --master yarn --deploy-mode client"
-
-# Use YARN deployment in cluster mode (requires Hadoop config)
-# --master yarn --deploy-mode cluster
-
-# Use local deployment
-# --master local
-
 ENTRYPOINT /opt/bitnami/spark/bin/spark-submit \
 	--master local \
-	--jars ${JDBC_JAR_FILE} \
+	#--jars ${JDBC_JAR_FILE} \
 	/app/spark-app.py
 
-#	--verbose \
-#	--py-files /app/dependencies.zip \
-
-CMD [""]
+CMD ["bash"]

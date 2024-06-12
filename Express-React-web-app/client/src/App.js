@@ -38,7 +38,7 @@ function App() {
         ))
       )}
       <div>
-        <button onClick={() => SeeMovies(Math.round(Math.random()*100000)%8000)}>Hier Klicken</button>
+        <button onClick={() => SeeMovies(Math.round(Math.random()*100000)%20)}>Hier Klicken</button>
       </div>
         {(typeof missionId.id === 'undefined') ? (
           <p>No Mission Id selected</p>
