@@ -1,1 +1,28 @@
 # Big-Data-Infrastructure
+## How to run
+
+1. start webserver
+```bash
+cd Express-React-web-app
+cd server
+npm run dev
+```
+2. start backend
+```bash
+cd Express-React-web-app
+cd client
+npm start
+
+3. start kafka-container
+```bash
+cd Kafka-container
+docker-compose up -d
+```
+
+## How to show kafka DataStream
+If Kafka is running, enter the current container and listen to the data-input-stream.
+```bash
+docker exec -it <container-id> bash
+
+/opt/kafka/bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic nextjs-events --from-beginning
+```

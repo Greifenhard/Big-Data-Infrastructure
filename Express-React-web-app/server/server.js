@@ -1,3 +1,4 @@
+const { Kafka, Partitioners  } = require('kafkajs')
 const express = require('express')
 const app = express()
 
@@ -18,15 +19,13 @@ app.get("/movies/:movieId", (req, res) => {
 });
 
 
-const { Kafka } = require('kafkajs')
-
 // Create the client with the broker list
 const kafka = new Kafka({
     clientId: 'seflbiadsf',
-    brokers: ['localhost:9092']
+    brokers: ['localhost:9092'],
   })
 
-const producer = kafka.producer()
+const producer = kafka.producer({ createPartitioner: Partitioners.LegacyPartitioner })
 
 async function sendTrackingMessage(data) {
     await producer.connect();
