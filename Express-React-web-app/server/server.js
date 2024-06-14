@@ -2,18 +2,24 @@ const { Kafka, Partitioners  } = require('kafkajs')
 const express = require('express')
 const app = express()
 
+const UserId = Math.round(Math.random()*1000000000)%200000+1 // user has specific userId, that changes whenever he starts the application
+
 app.get("/api", (req, res) => {
     res.json({"users": ["UserOne", "UserTwo","UserThree"]})
 })
 
-app.get("/movies/:movieId", (req, res) => {
+app.get("/movies/:movieId/:rating", (req, res) => {
     let movieId = req.params['movieId']
+    let rating = req.params['rating']
+    
     res.json({"id":[movieId]})
-
+    
     sendTrackingMessage({
-        movieId:Number(movieId), 
+        userId:Number(UserId),
+        movieId:Number(movieId),
+        rating:Number(rating),
         timestamp: Math.floor(new Date() / 1000)
-    }).then(() => console.log(`Sent movieId=${movieId} to kafka topic=nextjs-events`))
+    }).then(() => console.log(`Sent movieId=${movieId} with rating=${rating} to kafka topic=nextjs-events`))
         .catch(e => console.log("Error sending to kafka", e))
 
 });

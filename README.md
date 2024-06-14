@@ -5,12 +5,14 @@
 ```bash
 cd Express-React-web-app
 cd server
+npm i
 npm run dev
 ```
 2. start backend
 ```bash
 cd Express-React-web-app
 cd client
+npm i
 npm start
 ```
 
@@ -21,11 +23,11 @@ docker-compose up -d
 ```
 
 4. start pyspark
-````bash
+```bash
 cd Pyspark
 docker build -t spark_test .
 docker run -it --rm --net=host spark_test
-```bash
+```
 
 
 ## How to show kafka DataStream

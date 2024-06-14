@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react'
 
+const CountMovieIds = 20
+
 function App() {
 
   const [backendData, setBackendData] = useState([{}])
@@ -15,15 +17,13 @@ function App() {
     )
   }, [])
 
-  const SeeMovies = (id) => {
+  const SeeMovies = (id, ranking) => {
     console.log("Fetching movie id " + id)
-    fetch("/movies/"+ id).then(
+    fetch("/movies/"+ id + "/" + ranking).then(
       response => response.json()
     ).then(
       data => {
-        console.log(data)
-        setMissionId(data)
-        
+        setMissionId(data) 
       }
     )
   }
@@ -38,7 +38,7 @@ function App() {
         ))
       )}
       <div>
-        <button onClick={() => SeeMovies(Math.round(Math.random()*100000)%20)}>Hier Klicken</button>
+        <button onClick={() => SeeMovies(Math.round(Math.random()*100000)%CountMovieIds+1, Math.round(Math.random()*100000)%5+1)}>Hier Klicken</button>
       </div>
         {(typeof missionId.id === 'undefined') ? (
           <p>No Mission Id selected</p>

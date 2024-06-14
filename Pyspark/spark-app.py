@@ -1,6 +1,6 @@
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import *
-from pyspark.sql.types import IntegerType, StringType, StructType, TimestampType
+from pyspark.sql.types import IntegerType, StructType, TimestampType
 
 # dbUrl = 'jdbc:mysql://my-app-mariadb-service:3306/popular'
 # dbOptions = {"user": "root", "password": "mysecretpw"}
@@ -12,7 +12,7 @@ slidingDuration = '1 minute'
 # Example Part 1
 # Create a spark session
 spark = SparkSession.builder \
-    .appName("Use Case").getOrCreate()
+    .appName("Movie Recommender").getOrCreate()
 
 # Set log level
 spark.sparkContext.setLogLevel('WARN')
@@ -29,7 +29,9 @@ kafkaMessages = spark \
 
 # Define schema of tracking data
 trackingMessageSchema = StructType() \
+    .add("userId", IntegerType()) \
     .add("movieId", IntegerType()) \
+    .add("rating", IntegerType()) \
     .add("timestamp", IntegerType())
 
 # Example Part 3
@@ -49,25 +51,29 @@ trackingMessages = kafkaMessages.select(
     # Select all JSON fields
     column("json.*")
 ) \
+    .withColumnRenamed('json.userId', 'userId') \
     .withColumnRenamed('json.movieId', 'movieId') \
+    .withColumnRenamed('json.ranking', 'ranking') \
     .withWatermark("parsed_timestamp", windowDuration)
 
-# Example Part 4
-# Compute most popular slides
-popular = trackingMessages.groupBy(
-    window(
-        column("parsed_timestamp"),
-        windowDuration,
-        slidingDuration
-    ),
-    column("movieId")
-).count() \
- .withColumnRenamed('window.start', 'window_start') \
- .withColumnRenamed('window.end', 'window_end') \
+# # Example Part 4
+# # Compute most popular slides
+# popular = trackingMessages.groupBy(
+#     window(
+#         column("parsed_timestamp"),
+#         windowDuration,
+#         slidingDuration
+#     ),
+#     column("movieId"),
+#     column("userId"),
+#     column("ranking")
+# ).count() \
+#  .withColumnRenamed('window.start', 'window_start') \
+#  .withColumnRenamed('window.end', 'window_end') \
 
 # Example Part 5
 # Start running the query; print running counts to the console
-consoleDump = popular \
+consoleDump = trackingMessages \
     .writeStream \
     .outputMode("update") \
     .format("console") \
