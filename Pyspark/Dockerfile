@@ -62,7 +62,7 @@ COPY MovieLens-1Mil-Dataset/* /app/MovieLens-1Mil-Dataset/
 
 ENTRYPOINT /opt/bitnami/spark/bin/spark-submit \
 	--master local \
-	#--jars ${JDBC_JAR_FILE} \
+	--jars ${JDBC_JAR_FILE} \
 	/app/spark-app.py
 
 CMD ["bash"]

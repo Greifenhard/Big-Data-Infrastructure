@@ -35,7 +35,7 @@ If Kafka is running, enter the current container and listen to the data-input-st
 ```bash
 docker exec -it <container-id> bash
 
-/opt/kafka/bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic nextjs-events --from-beginning
+/opt/kafka/bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic movie_events --from-beginning
 ```
 
 

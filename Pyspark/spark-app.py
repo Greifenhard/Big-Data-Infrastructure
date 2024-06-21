@@ -27,7 +27,7 @@ kafkaMessages = spark \
     .readStream \
     .format("kafka") \
     .option("kafka.bootstrap.servers", "localhost:9092") \
-    .option("subscribe", "nextjs-events") \
+    .option("subscribe", "movie_events") \
     .option("startingOffsets", "earliest") \
     .load()
 
