@@ -27,6 +27,13 @@ ENV JDBC_JAR_FILE "${EXTRA_JAR_PATH}/mysql-connector-j-${MYSQL_DB_VERSION}.jar"
 RUN rm -rf ${IVY_PACKAGE_DIR}
 
 #------------------------------------
+
+# Dependencies for ML
+
+RUN pip install numpy
+
+#------------------------------------
+
 # Prepare the system
 
 WORKDIR /app/
@@ -49,6 +56,9 @@ WORKDIR /app
 
 # Copy application code
 COPY --chown=spark:spark *.py /app/
+
+# Copy data
+COPY MovieLens-1Mil-Dataset/* /app/MovieLens-1Mil-Dataset/
 
 ENTRYPOINT /opt/bitnami/spark/bin/spark-submit \
 	--master local \
