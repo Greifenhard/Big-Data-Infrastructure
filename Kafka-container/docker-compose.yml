@@ -17,5 +17,3 @@ services:
       KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_CREATE_TOPICS: "movie_events"
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock

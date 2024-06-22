@@ -1,0 +1,21 @@
+apiVersion: skaffold/v4beta11
+kind: Config
+metadata:
+  name: big-data-infrastructure
+build:
+  artifacts:
+    - image: greifmch/client
+      context: Express-React-web-app/client
+      # buildpacks:
+      #   builder: gcr.io/buildpacks/builder:v1
+    - image: greifmch/server
+      context: Express-React-web-app/server
+      # buildpacks:
+      #   builder: gcr.io/buildpacks/builder:v1
+    - image: greifmch/pyspark
+      context: Pyspark
+      # buildpacks:
+      #   builder: gcr.io/buildpacks/builder:v1
+manifests:
+  rawYaml:
+    - k8s/*.yaml

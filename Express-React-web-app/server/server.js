@@ -19,7 +19,7 @@ app.get("/movies/:movieId/:rating", (req, res) => {
         movieId:Number(movieId),
         rating:Number(rating),
         timestamp: Math.floor(new Date() / 1000)
-    }).then(() => console.log(`Sent movieId=${movieId} with rating=${rating} to kafka topic=movie_events`))
+    }).then(() => console.log(`Sent movieId=${movieId} with rating=${rating} to kafka topic=movie-events`))
         .catch(e => console.log("Error sending to kafka", e))
 
 });
@@ -28,7 +28,7 @@ app.get("/movies/:movieId/:rating", (req, res) => {
 // Create the client with the broker list
 const kafka = new Kafka({
     clientId: 'seflbiadsf', // Hier muss noch ein anderer Name hin
-    brokers: ['localhost:9092'],
+    brokers: ["my-cluster-kafka-bootstrap:9092"],
   })
 
 const producer = kafka.producer({ createPartitioner: Partitioners.LegacyPartitioner })
@@ -36,7 +36,7 @@ const producer = kafka.producer({ createPartitioner: Partitioners.LegacyPartitio
 async function sendTrackingMessage(data) {
     await producer.connect();
     await producer.send({
-        topic: 'movie_events',
+        topic: 'movie-events',
         messages: [
             { value: JSON.stringify(data) }
         ],

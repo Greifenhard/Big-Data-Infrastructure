@@ -26,8 +26,8 @@ spark.sparkContext.setLogLevel('WARN')
 kafkaMessages = spark \
     .readStream \
     .format("kafka") \
-    .option("kafka.bootstrap.servers", "localhost:9092") \
-    .option("subscribe", "movie_events") \
+    .option("kafka.bootstrap.servers", "my-cluster-kafka-bootstrap:9092") \
+    .option("subscribe", "movie-events") \
     .option("startingOffsets", "earliest") \
     .load()
 
