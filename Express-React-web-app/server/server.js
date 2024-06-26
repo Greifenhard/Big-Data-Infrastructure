@@ -1,10 +1,20 @@
 const { Kafka, Partitioners  } = require('kafkajs')
+const mariadb = require('mariadb')
 const express = require('express')
 const app = express()
 
 const UserId = Math.round(Math.random()*1000000000)%200000+1 // user has specific userId, that changes whenever he starts the application
 
 app.get("/api", (req, res) => {
+    const topX = 10;
+	getPopular(topX).then(values => {
+		const popularHtml = values
+			.map(pop => `<li> <a href='missions/${pop.id}'>${pop.id}</a> (${pop.count} views) </li>`)
+			.join("\n")
+        
+        console.log(popularHtml)
+    })
+
     res.json({"users": ["UserOne", "UserTwo","UserThree"]})
 })
 
@@ -24,10 +34,12 @@ app.get("/movies/:movieId/:rating", (req, res) => {
 
 });
 
+// -------------------------------------------------------
+// Kafka Configuration
+// -------------------------------------------------------
 
-// Create the client with the broker list
 const kafka = new Kafka({
-    clientId: 'seflbiadsf', // Hier muss noch ein anderer Name hin
+    clientId: 'selfBiasedClusterYDoICode', // Hier muss noch ein anderer Name hin
     brokers: ["my-cluster-kafka-bootstrap:9092"],
   })
 
@@ -43,6 +55,43 @@ async function sendTrackingMessage(data) {
     });
     await producer.disconnect();
 }
+
+
+// -------------------------------------------------------
+// Database Configuration
+// -------------------------------------------------------
+
+// Creating Poolobject to connect to Database
+const pool = mariadb.createPool({
+    host: "mariadb-service",
+    port: 3306,
+    database: "movies",
+    user: "root",
+    password: "mysecretpw",
+    connectionLimit: 5
+})
+
+// Get Data from Database with SQL
+async function executeQuery(query, data) {
+	let connection
+	try {
+		connection = await pool.getConnection()
+		console.log("Executing query ", query)
+		let res = await connection.query({ rowsAsArray: true, sql: query }, data)
+		return res
+	} finally {
+		if (connection)
+			connection.end()
+	}
+}
+
+// Get popular movies (from db only)
+async function getPopular(maxCount) {
+	const query = "SELECT MovieID, count FROM popular ORDER BY count DESC LIMIT ?"
+	return (await executeQuery(query, [maxCount]))
+		.map(row => ({ id: row?.[0], count: row?.[1] }))
+}
+
 
 app.listen(5001, () => {
     console.log("Server started on Port 5001")

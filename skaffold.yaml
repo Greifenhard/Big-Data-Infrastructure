@@ -6,16 +6,16 @@ build:
   artifacts:
     - image: greifmch/client
       context: Express-React-web-app/client
-      # buildpacks:
-      #   builder: gcr.io/buildpacks/builder:v1
-    - image: greifmch/server
-      context: Express-React-web-app/server
-      # buildpacks:
-      #   builder: gcr.io/buildpacks/builder:v1
+      docker:
+        dockerfile: Dockerfile
     - image: greifmch/pyspark
       context: Pyspark
-      # buildpacks:
-      #   builder: gcr.io/buildpacks/builder:v1
+      docker:
+        dockerfile: Dockerfile
+    - image: greifmch/server
+      context: Express-React-web-app/server
+      docker:
+        dockerfile: Dockerfile
 manifests:
   rawYaml:
     - k8s/*.yaml

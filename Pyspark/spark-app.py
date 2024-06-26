@@ -5,9 +5,9 @@ from pyspark.sql.types import IntegerType, StructType, TimestampType
 from pyspark.ml.recommendation import ALS
 from pyspark.ml.evaluation import RegressionEvaluator
 
-# dbUrl = 'jdbc:mysql://my-app-mariadb-service:3306/popular'
-# dbOptions = {"user": "root", "password": "mysecretpw"}
-# dbSchema = 'popular'
+dbUrl = 'jdbc:mysql://mariadb-service:3306/movies'
+dbOptions = {"user": "root", "password": "mysecretpw"}
+dbSchema = 'popular'
 
 windowDuration = '1 minute'
 slidingDuration = '1 minute'
@@ -96,7 +96,7 @@ watched_movies = trackingMessages.join(movies, on="MovieID")
 
 # Aggregate and sort recommendations
 top_results = recommended_movies.groupBy("MovieID", "MovieTitle", "Genre").agg(
-    avg("prediction").alias("avg_prediction")
+    avg("Rating").alias("avg_prediction")
 ).orderBy("avg_prediction", ascending=False)
 
 # Example Part 5
@@ -119,22 +119,18 @@ consoleDump3 = watched_movies \
     .format("console") \
     .start()
 
-# # Example Part 6
-
-# def saveToDatabase(batchDataframe, batchId):
-#     global dbUrl, dbSchema, dbOptions
-#     print(f"Writing batchID {batchId} to database @ {dbUrl}")
-#     batchDataframe.distinct().write.jdbc(dbUrl, dbSchema, "overwrite", dbOptions)
+def saveToDatabase(batchDataframe, batchId):
+    global dbUrl, dbSchema, dbOptions
+    print(f"Writing batchID {batchId} to database @ {dbUrl}")
+    batchDataframe.distinct().write.jdbc(dbUrl, dbSchema, "overwrite", dbOptions)
 
 
-# # Example Part 7
-# dbInsertStream = popular \
-#     .select(column('mission'), column('count')) \
-#     .writeStream \
-#     .outputMode("complete") \
-#     .foreachBatch(saveToDatabase) \
-#     .start()
-
+dbInsertStream = popular \
+    .select(column('MovieID'), column('count')) \
+    .writeStream \
+    .outputMode("complete") \
+    .foreachBatch(saveToDatabase) \
+    .start()
 
 # Wait for termination
 spark.streams.awaitAnyTermination()
