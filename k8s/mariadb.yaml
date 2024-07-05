@@ -15,7 +15,7 @@ data:
     CREATE TABLE `Prediction` (
       `id` INT NOT NULL,
       `UserID` INT NOT NULL, 
-      `Score` FLOAT,
+      `Score` NUMBER,
       PRIMARY KEY (`id`) 
     );
 
