@@ -7,9 +7,16 @@ data:
     SET GLOBAL sql_mode = 'ANSI_QUOTES';
 
     CREATE TABLE `popular` (
-      `id` INT NOT NULL,
+      `MovieID` INT NOT NULL,
       `count` BIGINT,
-       PRIMARY KEY (`id`)
+       PRIMARY KEY (`MovieID`)
+    );
+
+    CREATE TABLE `Prediction` (
+      `id` INT NOT NULL,
+      `UserID` INT NOT NULL, 
+      `Score` FLOAT,
+      PRIMARY KEY (`id`) 
     );
 
 ---

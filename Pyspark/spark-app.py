@@ -7,7 +7,6 @@ from pyspark.ml.evaluation import RegressionEvaluator
 
 dbUrl = 'jdbc:mysql://mariadb-service:3306/movies'
 dbOptions = {"user": "root", "password": "mysecretpw"}
-dbSchema = 'popular'
 
 windowDuration = '1 minute'
 slidingDuration = '1 minute'
@@ -101,35 +100,46 @@ top_results = recommended_movies.groupBy("MovieID", "MovieTitle", "Genre").agg(
 
 # Example Part 5
 # Start running the query; print running counts to the console
-consoleDump = popular \
-    .writeStream \
-    .outputMode("update") \
-    .format("console") \
-    .start()
+# consoleDump = popular \
+#     .writeStream \
+#     .outputMode("update") \
+#     .format("console") \
+#     .start()
 
-consoleDump2 = top_results \
-    .writeStream \
-    .outputMode("complete") \
-    .format("console") \
-    .start()
+# consoleDump2 = top_results \
+#     .writeStream \
+#     .outputMode("complete") \
+#     .format("console") \
+#     .start()
 
-consoleDump3 = watched_movies \
-    .writeStream \
-    .outputMode("update") \
-    .format("console") \
-    .start()
+# consoleDump3 = watched_movies \
+#     .writeStream \
+#     .outputMode("update") \
+#     .format("console") \
+#     .start()
 
-def saveToDatabase(batchDataframe, batchId):
-    global dbUrl, dbSchema, dbOptions
+def saveToDatabaseCounter(batchDataframe, batchId):
+    global dbUrl, dbOptions
     print(f"Writing batchID {batchId} to database @ {dbUrl}")
-    batchDataframe.distinct().write.jdbc(dbUrl, dbSchema, "overwrite", dbOptions)
+    batchDataframe.distinct().write.jdbc(dbUrl, 'popular', "overwrite", dbOptions)
 
+def saveToDatabasePrediction(batchDataframe, batchId):
+    global dbUrl, dbOptions
+    print(f"Writing batchID {batchId} to database @ {dbUrl}")
+    batchDataframe.distinct().write.jdbc(dbUrl, 'Prediction', "overwrite", dbOptions)
 
 dbInsertStream = popular \
     .select(column('MovieID'), column('count')) \
     .writeStream \
     .outputMode("complete") \
-    .foreachBatch(saveToDatabase) \
+    .foreachBatch(saveToDatabaseCounter) \
+    .start()
+
+dbInsertStream = top_results \
+    .select(column("MovieID"), column("UserID"), column("avg_prediction")) \
+    .writeStream \
+    .outputMode("complete") \
+    .foreachBatch(saveToDatabasePrediction) \
     .start()
 
 # Wait for termination
