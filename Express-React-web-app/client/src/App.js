@@ -18,26 +18,31 @@ function App() {
     console.log("Searching for:", searchTerm)
     setMovie({
       title: "Sample Movie",
-      movieId: "12345",
+      movieId: String(Math.round(Math.random()*10000000)%20),
       avgRating: 4.5,
       imageUrl: "https://via.placeholder.com/300x450"
     })
   }
-
+  const APIcall = () => {
+    fetch('/api').then(response => response.json())
+    .then(data => {
+        console.log(data.movies) // Hier sollten die Filme erscheinen
+    })
+  }
   const submitRating = () => {
     console.log("Submitting rating:", userRating, "for movie:", movie ? movie.movieId : "No movie selected")
+    
+    fetch("/movies/" + movie.movieId + "/" + userRating) // Sending data to kafka
+    
     setUserRating(0)
     setHoverRating(0)
   }
 
   const fetchMostWatched = () => {
-    setMostWatched([
-      { id: 1, title: "Most Watched 1", imageUrl: "https://via.placeholder.com/150x225" },
-      { id: 2, title: "Most Watched 2", imageUrl: "https://via.placeholder.com/150x225" },
-      { id: 3, title: "Most Watched 3", imageUrl: "https://via.placeholder.com/150x225" },
-      { id: 4, title: "Most Watched 4", imageUrl: "https://via.placeholder.com/150x225" },
-      { id: 5, title: "Most Watched 5", imageUrl: "https://via.placeholder.com/150x225" }
-    ])
+    fetch('/api').then(response => response.json())
+    .then(data => {
+        setMostWatched(data.movies) // Hier sollten die Filme erscheinen
+    })
   }
 
   const fetchBestRated = () => {
@@ -64,7 +69,8 @@ function App() {
               onChange={(e) => setSearchTerm(e.target.value)} 
               placeholder="Search for a movie"
             />
-            <button onClick={searchMovie}>Search</button>
+            <button onClick={() => searchMovie()}>Search</button>
+            <button onClick={() => APIcall()}>FetchAPI</button>
             <h2>{movie ? movie.title : "No Movie Selected"}</h2>
             <div className="rating-input">
               <label>Your Rating: </label>
@@ -80,7 +86,7 @@ function App() {
                 </span>
               ))}
             </div>
-            <button onClick={submitRating}>Submit Rating</button>
+            <button onClick={() => submitRating()}>Submit Rating</button>
           </div>
           <div className="movie-info">
             <img src={movie ? movie.imageUrl : "https://via.placeholder.com/300x450"} alt={movie ? movie.title : "No movie selected"} />
@@ -98,8 +104,8 @@ function App() {
           <div className="movie-list">
             {mostWatched.map(movie => (
               <div key={movie.id} className="movie-item">
-                <img src={movie.imageUrl} alt={movie.title} />
-                <p>{movie.title}</p>
+                <img src={"https://via.placeholder.com/150x225"} alt={movie.id} />
+                <p>{movie.count}</p>
               </div>
             ))}
           </div>

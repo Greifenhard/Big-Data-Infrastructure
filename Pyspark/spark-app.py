@@ -5,13 +5,9 @@ from pyspark.sql.types import IntegerType, StructType, TimestampType
 from pyspark.ml.recommendation import ALS
 from pyspark.ml.evaluation import RegressionEvaluator
 
-dbUrl = 'jdbc:mysql://mariadb-service:3306/movies'
-dbOptions = {"user": "root", "password": "mysecretpw"}
-
 windowDuration = '1 minute'
 slidingDuration = '1 minute'
 
-# Example Part 1
 # Create a spark session
 spark = SparkSession.builder \
     .appName("Movie Recommender") \
@@ -20,7 +16,6 @@ spark = SparkSession.builder \
 # Set log level
 spark.sparkContext.setLogLevel('WARN')
 
-# Example Part 2
 # Read messages from Kafka
 kafkaMessages = spark \
     .readStream \
@@ -37,7 +32,6 @@ trackingMessageSchema = StructType() \
     .add("rating", IntegerType()) \
     .add("timestamp", IntegerType())
 
-# Example Part 3
 # Convert value: binary -> JSON -> fields + parsed timestamp
 trackingMessages = kafkaMessages.select(
     # Extract 'value' from Kafka message (i.e., the tracking data)
@@ -58,7 +52,6 @@ trackingMessages = kafkaMessages.select(
   .withColumnRenamed('movieId', 'MovieID') \
   .withColumnRenamed('rating', 'Rating')
 
-# Example Part 4
 # Compute most popular slides
 popular = trackingMessages.groupBy(
     window(
@@ -98,8 +91,6 @@ top_results = recommended_movies.groupBy("MovieID", "MovieTitle", "Genre").agg(
     avg("Rating").alias("avg_prediction")
 ).orderBy("avg_prediction", ascending=False)
 
-# Example Part 5
-# Start running the query; print running counts to the console
 # consoleDump = popular \
 #     .writeStream \
 #     .outputMode("update") \
@@ -118,10 +109,13 @@ top_results = recommended_movies.groupBy("MovieID", "MovieTitle", "Genre").agg(
 #     .format("console") \
 #     .start()
 
+dbUrl = "jdbc:mysql://mariadb-service:3306/movies"
+dbOptions = {"user": "root", "password": "mysecretpw"}
+
 def saveToDatabaseCounter(batchDataframe, batchId):
     global dbUrl, dbOptions
     print(f"Writing batchID {batchId} to database @ {dbUrl}")
-    batchDataframe.distinct().write.jdbc(dbUrl, 'popular', "overwrite", dbOptions)
+    batchDataframe.write.jdbc(dbUrl, 'popular', "overwrite", dbOptions)
 
 dbInsertStream = popular \
     .select(column('MovieID'), column('count')) \

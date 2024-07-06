@@ -6,17 +6,16 @@ const app = express()
 const UserId = Math.round(Math.random()*1000000000)%200000+1 // user has specific userId, that changes whenever he starts the application
 
 app.get("/api", (req, res) => {
-    const topX = 10;
-	getPopular(topX).then(values => {
-		const popularHtml = values
-			.map(pop => `<li> <a href='missions/${pop.id}'>${pop.id}</a> (${pop.count} views) </li>`)
-			.join("\n")
-        
-        console.log(popularHtml)
+    const topX = 5;
+    getPopular(topX).then(values => {
+        const convertedValues = values.map(value => ({
+            id: value.id,
+            count: Number(value.count)
+        }));
+        console.log(convertedValues)
+        res.send({"movies": convertedValues})
     })
-
-    res.json({"users": ["UserOne", "UserTwo","UserThree"]})
-})
+});
 
 app.get("/movies/:movieId/:rating", (req, res) => {
     let movieId = req.params['movieId']
@@ -87,7 +86,7 @@ async function executeQuery(query, data) {
 
 // Get popular movies (from db only)
 async function getPopular(maxCount) {
-	const query = "SELECT MovieID, count FROM popular ORDER BY count DESC LIMIT ?"
+	const query = "SELECT MovieID, SUM(count) FROM popular GROUP BY MovieID ORDER BY count DESC LIMIT ?"
 	return (await executeQuery(query, [maxCount]))
 		.map(row => ({ id: row?.[0], count: row?.[1] }))
 }

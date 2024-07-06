@@ -12,12 +12,12 @@ data:
        PRIMARY KEY (`MovieID`)
     );
 
-    CREATE TABLE `Prediction` (
-      `id` INT NOT NULL,
-      `UserID` INT NOT NULL, 
-      `Score` NUMBER,
-      PRIMARY KEY (`id`) 
-    );
+    # CREATE TABLE `Prediction` (
+    #   `id` INT NOT NULL,
+    #   `UserID` INT NOT NULL, 
+    #   `Score` NUMBER,
+    #   PRIMARY KEY (`id`) 
+    # );
 
 ---
 apiVersion: apps/v1
