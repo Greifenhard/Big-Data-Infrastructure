@@ -4,20 +4,18 @@ import './App.css'
 function App() {
   const [searchTerm, setSearchTerm] = useState('')
   const [movie, setMovie] = useState(null)
-  const [userRating, setUserRating] = useState('')
+  const [userRating, setUserRating] = useState(0)
+  const [hoverRating, setHoverRating] = useState(0)
   const [mostWatched, setMostWatched] = useState([])
   const [bestRated, setBestRated] = useState([])
 
   useEffect(() => {
-    // Fetch most watched and best rated movies on component mount
     fetchMostWatched()
     fetchBestRated()
   }, [])
 
   const searchMovie = () => {
-    // Placeholder for API call to search movie
     console.log("Searching for:", searchTerm)
-    // Simulating API response
     setMovie({
       title: "Sample Movie",
       movieId: "12345",
@@ -27,12 +25,12 @@ function App() {
   }
 
   const submitRating = () => {
-    // Placeholder for API call to submit rating
-    console.log("Submitting rating:", userRating, "for movie:", movie.movieId)
+    console.log("Submitting rating:", userRating, "for movie:", movie ? movie.movieId : "No movie selected")
+    setUserRating(0)
+    setHoverRating(0)
   }
 
   const fetchMostWatched = () => {
-    // Placeholder for API call to fetch most watched movies
     setMostWatched([
       { id: 1, title: "Most Watched 1", imageUrl: "https://via.placeholder.com/150x225" },
       { id: 2, title: "Most Watched 2", imageUrl: "https://via.placeholder.com/150x225" },
@@ -43,7 +41,6 @@ function App() {
   }
 
   const fetchBestRated = () => {
-    // Placeholder for API call to fetch best rated movies
     setBestRated([
       { id: 1, title: "Best Rated 1", imageUrl: "https://via.placeholder.com/150x225" },
       { id: 2, title: "Best Rated 2", imageUrl: "https://via.placeholder.com/150x225" },
@@ -56,7 +53,7 @@ function App() {
   return (
     <div className="container">
       <header>
-        <h1>Movie Search and Rating</h1>
+        <h1>Movie Recommender System</h1>
       </header>
       <main>
         <section className="search-section">
@@ -68,25 +65,31 @@ function App() {
               placeholder="Search for a movie"
             />
             <button onClick={searchMovie}>Search</button>
+            <h2>{movie ? movie.title : "No Movie Selected"}</h2>
+            <div className="rating-input">
+              <label>Your Rating: </label>
+              {[1, 2, 3, 4, 5].map((star) => (
+                <span
+                  key={star}
+                  onClick={() => setUserRating(star)}
+                  onMouseEnter={() => setHoverRating(star)}
+                  onMouseLeave={() => setHoverRating(0)}
+                  className={`star ${star <= (hoverRating || userRating) ? 'active' : ''}`}
+                >
+                  ★
+                </span>
+              ))}
+            </div>
+            <button onClick={submitRating}>Submit Rating</button>
+          </div>
+          <div className="movie-info">
+            <img src={movie ? movie.imageUrl : "https://via.placeholder.com/300x450"} alt={movie ? movie.title : "No movie selected"} />
             {movie && (
-              <div className="movie-info">
-                <h2>{movie.title}</h2>
+              <>
                 <p>Movie ID: {movie.movieId}</p>
                 <p>Average Rating: {movie.avgRating}</p>
-                <input 
-                  type="number" 
-                  min="1" 
-                  max="5" 
-                  value={userRating} 
-                  onChange={(e) => setUserRating(e.target.value)} 
-                  placeholder="Your rating (1-5)"
-                />
-                <button onClick={submitRating}>Submit Rating</button>
-              </div>
+              </>
             )}
-          </div>
-          <div className="image-column">
-            {movie && <img src={movie.imageUrl} alt={movie.title} />}
           </div>
         </section>
 
