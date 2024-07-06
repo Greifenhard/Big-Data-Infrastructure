@@ -87,7 +87,7 @@ async function executeQuery(query, data) {
 
 // Get popular movies (from db only)
 async function getPopular(maxCount) {
-	const query = "SELECT MovieID, count FROM (SELECT MovieID, SUM(count) as count FROM popular WHERE MovieID=MovieID) ORDER BY count DESC LIMIT ?"
+	const query = "SELECT MovieID, count FROM popular ORDER BY count DESC LIMIT ?"
 	return (await executeQuery(query, [maxCount]))
 		.map(row => ({ id: row?.[0], count: row?.[1] }))
 }

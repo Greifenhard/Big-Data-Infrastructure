@@ -123,23 +123,11 @@ def saveToDatabaseCounter(batchDataframe, batchId):
     print(f"Writing batchID {batchId} to database @ {dbUrl}")
     batchDataframe.distinct().write.jdbc(dbUrl, 'popular', "overwrite", dbOptions)
 
-def saveToDatabasePrediction(batchDataframe, batchId):
-    global dbUrl, dbOptions
-    print(f"Writing batchID {batchId} to database @ {dbUrl}")
-    batchDataframe.distinct().write.jdbc(dbUrl, 'Prediction', "overwrite", dbOptions)
-
 dbInsertStream = popular \
     .select(column('MovieID'), column('count')) \
     .writeStream \
     .outputMode("complete") \
     .foreachBatch(saveToDatabaseCounter) \
-    .start()
-
-dbInsertStream = top_results \
-    .select(column("MovieID"), column("UserID"), column("avg_prediction")) \
-    .writeStream \
-    .outputMode("complete") \
-    .foreachBatch(saveToDatabasePrediction) \
     .start()
 
 # Wait for termination
