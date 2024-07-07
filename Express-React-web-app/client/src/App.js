@@ -4,8 +4,8 @@ import './App.css';
 function App() {
   const [searchTerm, setSearchTerm] = useState('');
   const [movie, setMovie] = useState(null);
-  const [userRating, setUserRating] = useState(1);
-  const [hoverRating, setHoverRating] = useState(1);
+  const [userRating, setUserRating] = useState(0);
+  const [hoverRating, setHoverRating] = useState(0);
   const [mostWatched, setMostWatched] = useState([]);
   const [bestRated, setBestRated] = useState([]);
   const [movies, setMovies] = useState([]);
@@ -38,32 +38,57 @@ function App() {
     if (value.length > 1) {
       const filteredSuggestions = movies.filter(movie =>
         movie.title.toLowerCase().includes(value.toLowerCase())
-      ).slice(0, 5)
+      ).slice(0, 5); // Limit to 5 suggestions
       setSuggestions(filteredSuggestions);
     } else {
       setSuggestions([]);
     }
   };
 
-  const selectSuggestion = (suggestion) => {
+  const getImageFromTMDB = async (movieName) => {
+    // Remove the number at the end of the title
+    const cleanedName = movieName.replace(/\s*\(\d{4}\)$/, '');
+    const url = `https://api.themoviedb.org/3/search/movie?query=${cleanedName}`;
+    const headers = {
+      "accept": "application/json",
+      "Authorization": `Bearer ${process.env.REACT_APP_TMDB_API_KEY}`
+    };
+
+    try {
+      const response = await fetch(url, { headers });
+      const data = await response.json();
+      if (data.results && data.results.length > 0) {
+        return `https://image.tmdb.org/t/p/w185${data.results[0].poster_path}`;
+      } else {
+        return null;
+      }
+    } catch (error) {
+      console.error("Error fetching image from TMDB:", error);
+      return null;
+    }
+  };
+
+  const selectSuggestion = async (suggestion) => {
     setSearchTerm(suggestion.title);
     setSuggestions([]);
+    const imageUrl = await getImageFromTMDB(suggestion.title);
     setMovie({
       title: suggestion.title,
       movieId: suggestion.id,
       avgRating: 4.5, // Placeholder rating, update this if you have actual rating data
-      imageUrl: "https://via.placeholder.com/300x450"
+      imageUrl: imageUrl || "https://via.placeholder.com/300x450"
     });
   };
 
-  const searchMovie = () => {
+  const searchMovie = async () => {
     const foundMovie = movies.find(m => m.title.toLowerCase().includes(searchTerm.toLowerCase()));
     if (foundMovie) {
+      const imageUrl = await getImageFromTMDB(foundMovie.title);
       setMovie({
         title: foundMovie.title,
         movieId: foundMovie.id,
         avgRating: 4.5, // Placeholder rating, update this if you have actual rating data
-        imageUrl: "https://via.placeholder.com/300x450"
+        imageUrl: imageUrl || "https://via.placeholder.com/300x450"
       });
     } else {
       setMovie(null);
@@ -73,8 +98,8 @@ function App() {
   const submitRating = () => {
     console.log("Submitting rating:", userRating, "for movie:", movie ? movie.movieId : "No movie selected");
     fetch("/movies/" + movie.movieId + "/" + userRating);
-    setUserRating(1);
-    setHoverRating(1);
+    setUserRating(0);
+    setHoverRating(0);
   };
 
   const fetchMostWatched = () => {
