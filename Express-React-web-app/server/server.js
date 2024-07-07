@@ -10,6 +10,7 @@ app.get("/popular", (req, res) => {
     getPopular(topX).then(values => {
         const convertedValues = values.map(value => ({
             id: value.id,
+            title: value.title,
             count: Number(value.count)
         }));
         console.log(convertedValues)
@@ -22,7 +23,7 @@ app.get("/prediction", (req, res) => {
     getPrediction(topX).then(values => {
         const convertedValues = values.map(value => ({
             id: value.id,
-            user: value.user,
+            title: value.title,
             score: Number(value.score)
         }));
         console.log(convertedValues)
@@ -99,15 +100,15 @@ async function executeQuery(query, data) {
 
 // Get popular movies (from db only)
 async function getPopular(maxCount) {
-	const query = "SELECT MovieID, SUM(count) FROM popular GROUP BY MovieID ORDER BY count DESC LIMIT ?"
+	const query = "SELECT MovieID, MovieTitle, SUM(count) FROM popular GROUP BY MovieID ORDER BY count DESC LIMIT ?"
 	return (await executeQuery(query, [maxCount]))
-		.map(row => ({ id: row?.[0], count: row?.[1] }))
+		.map(row => ({ id: row?.[0], title: row?.[1] ,count: row?.[2] }))
 }
 
 async function getPrediction(maxCount) {
 	const query = "SELECT * FROM prediction ORDER BY avg_prediction DESC LIMIT ?"
 	return (await executeQuery(query, [maxCount]))
-		.map(row => ({ id: row?.[0], user: row?.[1] , score: row?.[2] }))
+		.map(row => ({ id: row?.[0], title: row?.[1] , score: row?.[2] }))
 }
 
 

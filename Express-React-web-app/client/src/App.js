@@ -25,10 +25,10 @@ function App() {
         }).filter(movie => movie !== null);
         setMovies(parsedMovies);
       })
-      .catch(error => console.error('Error loading the movie data:', error));
+      .catch(error => console.error('Error loading the movie data:', error))
 
-    fetchMostWatched();
-    fetchBestRated();
+    fetchMostWatched()
+    fetchBestRated()
   }, []);
 
   const handleSearchTermChange = (e) => {
@@ -45,28 +45,28 @@ function App() {
     }
   };
 
-  const getImageFromTMDB = async (movieName) => {
-    // Remove the number at the end of the title
-    const cleanedName = movieName.replace(/\s*\(\d{4}\)$/, '');
-    const url = `https://api.themoviedb.org/3/search/movie?query=${cleanedName}`;
-    const headers = {
-      "accept": "application/json",
-      "Authorization": `Bearer ${process.env.REACT_APP_TMDB_API_KEY}`
-    };
+    const getImageFromTMDB = async (movieName) => {
+        // Remove the number at the end of the title
+        const cleanedName = movieName.replace(/\s*\(\d{4}\)$/, '');
+        const url = `https://api.themoviedb.org/3/search/movie?query=${cleanedName}`;
+        const headers = {
+            "accept": "application/json",
+            "Authorization": `Bearer ${process.env.REACT_APP_TMDB_API_KEY}`
+        };
 
-    try {
-      const response = await fetch(url, { headers });
-      const data = await response.json();
-      if (data.results && data.results.length > 0) {
-        return `https://image.tmdb.org/t/p/w185${data.results[0].poster_path}`;
-      } else {
-        return null;
-      }
-    } catch (error) {
-      console.error("Error fetching image from TMDB:", error);
-      return null;
-    }
-  };
+        try {
+            const response = await fetch(url, { headers });
+            const data = await response.json();
+            if (data.results && data.results.length > 0) {
+            return `https://image.tmdb.org/t/p/w185${data.results[0].poster_path}`;
+            } else {
+            return null;
+            }
+        } catch (error) {
+            console.error("Error fetching image from TMDB:", error);
+            return null;
+        }
+    };
 
   const selectSuggestion = async (suggestion) => {
     setSearchTerm(suggestion.title);
@@ -76,7 +76,7 @@ function App() {
       title: suggestion.title,
       movieId: suggestion.id,
       avgRating: 4.5, // Placeholder rating, update this if you have actual rating data
-      imageUrl: imageUrl || "https://via.placeholder.com/300x450"
+      imageUrl: imageUrl || "https://via.placeholder.com/185x278"
     });
   };
 
@@ -88,7 +88,7 @@ function App() {
         title: foundMovie.title,
         movieId: foundMovie.id,
         avgRating: 4.5, // Placeholder rating, update this if you have actual rating data
-        imageUrl: imageUrl || "https://via.placeholder.com/300x450"
+        imageUrl: imageUrl || "https://via.placeholder.com/185x278"
       });
     } else {
       setMovie(null);
@@ -102,20 +102,28 @@ function App() {
     setHoverRating(0);
   };
 
-  const fetchMostWatched = () => {
-    fetch('/popular')
-      .then(response => response.json())
-      .then(data => {
-        setMostWatched(data.movies);
-      });
-  };
+  const fetchMostWatched = async () => {
+    const response = await fetch('/popular');
+    const data = await response.json();
+    const moviePromises = data.movies.map(async (movie) => {
+        const imageUrl = await getImageFromTMDB(movie.title);
+        return { ...movie, URL: imageUrl };
+    });
 
-  const fetchBestRated = () => {
-    fetch('/prediction')
-      .then(response => response.json())
-      .then(data => {
-        setBestRated(data.prediction);
-      });
+    const movieCounter = await Promise.all(moviePromises);
+    setMostWatched(movieCounter);
+};
+
+  const fetchBestRated = async () => {
+    const response = await fetch('/prediction');
+    const data = await response.json();
+    const moviePromises = data.prediction.map(async (movie) => {
+        const imageUrl = await getImageFromTMDB(movie.title);
+        return { ...movie, URL: imageUrl };
+    })
+    const movieCounter = await Promise.all(moviePromises);
+    setBestRated(movieCounter);
+
   };
 
   return (
@@ -158,13 +166,13 @@ function App() {
             <button onClick={() => submitRating()}>Submit Rating</button>
           </div>
           <div className="movie-info">
-            <img src={movie ? movie.imageUrl : "https://via.placeholder.com/300x450"} alt={movie ? movie.title : "No movie selected"} />
-            {movie && (
+            <img src={movie ? movie.imageUrl : "https://via.placeholder.com/185x278"} alt={movie ? movie.title : "No movie selected"} />
+            {/* {movie && (
               <>
                 <p>Movie ID: {movie.movieId}</p>
                 <p>Average Rating: {movie.avgRating}</p>
               </>
-            )}
+            )} */}
           </div>
         </section>
 
@@ -173,8 +181,9 @@ function App() {
           <div className="movie-list">
             {mostWatched.map(movie => (
               <div key={movie.id} className="movie-item">
-                <img src={"https://via.placeholder.com/150x225"} alt={movie.id} />
-                <p>{movie.count}</p>
+                <p>Watchcount: {movie.count}</p>
+                <img src={movie.URL || "https://via.placeholder.com/150x225"} alt={movie.id} />
+                <p>{movie.title}</p>
               </div>
             ))}
           </div>
@@ -185,8 +194,9 @@ function App() {
           <div className="movie-list">
             {bestRated.map(movie => (
               <div key={movie.id} className="movie-item">
-                <img src={"https://via.placeholder.com/150x225"} alt={movie.id} />
-                <p>{movie.user}</p>
+                <p>Rating: {movie.score}</p>
+                <img src={movie.URL || "https://via.placeholder.com/150x225"} alt={movie.id} />
+                <p>{movie.title}</p>
               </div>
             ))}
           </div>

@@ -53,7 +53,7 @@ trackingMessages = kafkaMessages.select(
   .withColumnRenamed('rating', 'Rating')
 
 # Compute most popular slides
-popular = trackingMessages.groupBy(
+popular_new = trackingMessages.groupBy(
     window(
         column("parsed_timestamp"),
         windowDuration,
@@ -83,6 +83,7 @@ movies = spark.read.csv("MovieLens-1Mil-Dataset/movies.dat", sep="::", schema='M
 
 # Join recommendations with movies
 recommended_movies = recommendations.join(movies, on="MovieID")
+popular = popular_new.join(movies, on="MovieID")
 
 watched_movies = trackingMessages.join(movies, on="MovieID")
 
@@ -123,7 +124,7 @@ def saveToDatabasePrediction(batchDataframe, batchId):
     batchDataframe.write.jdbc(dbUrl, "prediction", "overwrite", dbOptions)
 
 dbInsertStream = popular \
-    .select(column('MovieID'), column('count')) \
+    .select(column('MovieID'), column('MovieTitle'), column('count')) \
     .writeStream \
     .outputMode("complete") \
     .foreachBatch(saveToDatabaseCounter) \
