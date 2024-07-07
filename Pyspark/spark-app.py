@@ -114,14 +114,26 @@ dbOptions = {"user": "root", "password": "mysecretpw"}
 
 def saveToDatabaseCounter(batchDataframe, batchId):
     global dbUrl, dbOptions
-    print(f"Writing batchID {batchId} to database @ {dbUrl}")
+    print(f"Writing batchID {batchId} to database @ {dbUrl}/popular")
     batchDataframe.write.jdbc(dbUrl, 'popular', "overwrite", dbOptions)
+
+def saveToDatabasePrediction(batchDataframe, batchId):
+    global dbUrl, dbOptions
+    print(f"Writing batchID {batchId} to database @ {dbUrl}/prediction")
+    batchDataframe.write.jdbc(dbUrl, "prediction", "overwrite", dbOptions)
 
 dbInsertStream = popular \
     .select(column('MovieID'), column('count')) \
     .writeStream \
     .outputMode("complete") \
     .foreachBatch(saveToDatabaseCounter) \
+    .start()
+
+dbInsertStream = top_results \
+    .select(column('MovieID'), column('MovieTitle'), column('avg_prediction')) \
+    .writeStream \
+    .outputMode("complete") \
+    .foreachBatch(saveToDatabasePrediction) \
     .start()
 
 # Wait for termination

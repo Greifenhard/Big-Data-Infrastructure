@@ -7,17 +7,15 @@ data:
     SET GLOBAL sql_mode = 'ANSI_QUOTES';
 
     CREATE TABLE `popular` (
-      `MovieID` INT NOT NULL,
-      `count` BIGINT,
-       PRIMARY KEY (`MovieID`)
+      `MovieID` INT PRIMARY KEY,
+      `count` BIGINT
     );
 
-    # CREATE TABLE `Prediction` (
-    #   `id` INT NOT NULL,
-    #   `UserID` INT NOT NULL, 
-    #   `Score` NUMBER,
-    #   PRIMARY KEY (`id`) 
-    # );
+    CREATE TABLE `prediction` (
+      `MovieID` INT PRIMARY KEY,
+      `UserID` INT NOT NULL, 
+      `Score` DOUBLE
+    );
 
 ---
 apiVersion: apps/v1

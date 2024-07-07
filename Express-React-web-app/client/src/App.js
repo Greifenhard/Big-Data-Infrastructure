@@ -23,36 +23,27 @@ function App() {
       imageUrl: "https://via.placeholder.com/300x450"
     })
   }
-  const APIcall = () => {
-    fetch('/api').then(response => response.json())
-    .then(data => {
-        console.log(data.movies) // Hier sollten die Filme erscheinen
-    })
-  }
+
   const submitRating = () => {
     console.log("Submitting rating:", userRating, "for movie:", movie ? movie.movieId : "No movie selected")
-    
-    fetch("/movies/" + movie.movieId + "/" + userRating) // Sending data to kafka
+    movie ? fetch("/movies/" + movie.movieId + "/" + userRating) : // Sending data to kafka
     
     setUserRating(0)
     setHoverRating(0)
   }
 
   const fetchMostWatched = () => {
-    fetch('/api').then(response => response.json())
+    fetch('/popular').then(response => response.json())
     .then(data => {
-        setMostWatched(data.movies) // Hier sollten die Filme erscheinen
+        setMostWatched(data.movies)
     })
   }
 
   const fetchBestRated = () => {
-    setBestRated([
-      { id: 1, title: "Best Rated 1", imageUrl: "https://via.placeholder.com/150x225" },
-      { id: 2, title: "Best Rated 2", imageUrl: "https://via.placeholder.com/150x225" },
-      { id: 3, title: "Best Rated 3", imageUrl: "https://via.placeholder.com/150x225" },
-      { id: 4, title: "Best Rated 4", imageUrl: "https://via.placeholder.com/150x225" },
-      { id: 5, title: "Best Rated 5", imageUrl: "https://via.placeholder.com/150x225" }
-    ])
+    fetch('/prediction').then(response => response.json())
+    .then(data => {
+        setBestRated(data.prediction)
+    })
   }
 
   return (
@@ -70,7 +61,6 @@ function App() {
               placeholder="Search for a movie"
             />
             <button onClick={() => searchMovie()}>Search</button>
-            <button onClick={() => APIcall()}>FetchAPI</button>
             <h2>{movie ? movie.title : "No Movie Selected"}</h2>
             <div className="rating-input">
               <label>Your Rating: </label>
@@ -116,8 +106,8 @@ function App() {
           <div className="movie-list">
             {bestRated.map(movie => (
               <div key={movie.id} className="movie-item">
-                <img src={movie.imageUrl} alt={movie.title} />
-                <p>{movie.title}</p>
+                <img src={"https://via.placeholder.com/150x225"} alt={movie.id} />
+                <p>{movie.user}</p>
               </div>
             ))}
           </div>

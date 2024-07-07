@@ -1,7 +1,7 @@
 # Big-Data-Infrastructure
 
 ## Prerequisite
-You need to have kafka in your kubernetes (Minikube)
+You need to have kafka in your kubernetes (Minikube).\n
 Please have atleast 4 CPUs and 5000 MB Memory for Kafka to work without issues
 
 1. Run the strimzi operator

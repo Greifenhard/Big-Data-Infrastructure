@@ -5,7 +5,7 @@ const app = express()
 
 const UserId = Math.round(Math.random()*1000000000)%200000+1 // user has specific userId, that changes whenever he starts the application
 
-app.get("/api", (req, res) => {
+app.get("/popular", (req, res) => {
     const topX = 5;
     getPopular(topX).then(values => {
         const convertedValues = values.map(value => ({
@@ -14,6 +14,19 @@ app.get("/api", (req, res) => {
         }));
         console.log(convertedValues)
         res.send({"movies": convertedValues})
+    })
+});
+
+app.get("/prediction", (req, res) => {
+    const topX = 5;
+    getPrediction(topX).then(values => {
+        const convertedValues = values.map(value => ({
+            id: value.id,
+            user: value.user,
+            score: Number(value.score)
+        }));
+        console.log(convertedValues)
+        res.send({"prediction": convertedValues})
     })
 });
 
@@ -40,7 +53,7 @@ app.get("/movies/:movieId/:rating", (req, res) => {
 const kafka = new Kafka({
     clientId: 'selfBiasedClusterYDoICode', // Hier muss noch ein anderer Name hin
     brokers: ["my-cluster-kafka-bootstrap:9092"],
-  })
+})
 
 const producer = kafka.producer({ createPartitioner: Partitioners.LegacyPartitioner })
 
@@ -89,6 +102,12 @@ async function getPopular(maxCount) {
 	const query = "SELECT MovieID, SUM(count) FROM popular GROUP BY MovieID ORDER BY count DESC LIMIT ?"
 	return (await executeQuery(query, [maxCount]))
 		.map(row => ({ id: row?.[0], count: row?.[1] }))
+}
+
+async function getPrediction(maxCount) {
+	const query = "SELECT * FROM prediction ORDER BY avg_prediction DESC LIMIT ?"
+	return (await executeQuery(query, [maxCount]))
+		.map(row => ({ id: row?.[0], user: row?.[1] , score: row?.[2] }))
 }
 
 
