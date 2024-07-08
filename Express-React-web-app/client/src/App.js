@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import './App.css';
+import React, { useState, useEffect } from "react";
+import "./App.css";
 
 function App() {
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [movie, setMovie] = useState(null);
   const [userRating, setUserRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
@@ -12,23 +12,49 @@ function App() {
   const [suggestions, setSuggestions] = useState([]);
 
   useEffect(() => {
-    fetch('/movies.dat')
-      .then(response => response.text())
-      .then(data => {
-        const parsedMovies = data.split('\n').map(line => {
-          const parts = line.split('::');
-          if (parts.length === 3) {
-            const [id, title, genres] = parts;
-            return { id, title, genres };
-          }
-          return null;
-        }).filter(movie => movie !== null);
+    fetch("/movies.dat")
+      .then((response) => response.text())
+      .then((data) => {
+        const parsedMovies = data
+          .split("\n")
+          .map((line) => {
+            const parts = line.split("::");
+            if (parts.length === 3) {
+              const [id, title, genres] = parts;
+              return { id, title, genres };
+            }
+            return null;
+          })
+          .filter((movie) => movie !== null);
         setMovies(parsedMovies);
       })
-      .catch(error => console.error('Error loading the movie data:', error))
+      .catch((error) => console.error("Error loading the movie data:", error));
 
-    fetchMostWatched()
-    fetchBestRated()
+    const fetchMostWatched = async () => {
+      const response = await fetch("/popular");
+      const data = await response.json();
+      const moviePromises = data.movies.map(async (movie) => {
+        const imageUrl = await getImageFromTMDB(movie.title);
+        return { ...movie, URL: imageUrl };
+      });
+
+      const movieCounter = await Promise.all(moviePromises);
+      setMostWatched(movieCounter);
+    };
+
+    const fetchBestRated = async () => {
+      const response = await fetch("/prediction");
+      const data = await response.json();
+      const moviePromises = data.prediction.map(async (movie) => {
+        const imageUrl = await getImageFromTMDB(movie.title);
+        return { ...movie, URL: imageUrl };
+      });
+
+      const movieCounter = await Promise.all(moviePromises);
+      setBestRated(movieCounter);
+    };
+    fetchMostWatched();
+    fetchBestRated();
   }, []);
 
   const handleSearchTermChange = (e) => {
@@ -36,37 +62,39 @@ function App() {
     setSearchTerm(value);
 
     if (value.length > 1) {
-      const filteredSuggestions = movies.filter(movie =>
-        movie.title.toLowerCase().includes(value.toLowerCase())
-      ).slice(0, 5); // Limit to 5 suggestions
+      const filteredSuggestions = movies
+        .filter((movie) =>
+          movie.title.toLowerCase().includes(value.toLowerCase())
+        )
+        .slice(0, 5); // Limit to 5 suggestions
       setSuggestions(filteredSuggestions);
     } else {
       setSuggestions([]);
     }
   };
 
-    const getImageFromTMDB = async (movieName) => {
-        // Remove the number at the end of the title
-        const cleanedName = movieName.replace(/\s*\(\d{4}\)$/, '');
-        const url = `https://api.themoviedb.org/3/search/movie?query=${cleanedName}`;
-        const headers = {
-            "accept": "application/json",
-            "Authorization": `Bearer ${process.env.REACT_APP_TMDB_API_KEY}`
-        };
-
-        try {
-            const response = await fetch(url, { headers });
-            const data = await response.json();
-            if (data.results && data.results.length > 0) {
-            return `https://image.tmdb.org/t/p/w185${data.results[0].poster_path}`;
-            } else {
-            return null;
-            }
-        } catch (error) {
-            console.error("Error fetching image from TMDB:", error);
-            return null;
-        }
+  const getImageFromTMDB = async (movieName) => {
+    // Remove the number at the end of the title
+    const cleanedName = movieName.replace(/\s*\(\d{4}\)$/, "");
+    const url = `https://api.themoviedb.org/3/search/movie?query=${cleanedName}`;
+    const headers = {
+      accept: "application/json",
+      Authorization: `Bearer ${process.env.REACT_APP_TMDB_API_KEY}`,
     };
+
+    try {
+      const response = await fetch(url, { headers });
+      const data = await response.json();
+      if (data.results && data.results.length > 0) {
+        return `https://image.tmdb.org/t/p/w185${data.results[0].poster_path}`;
+      } else {
+        return null;
+      }
+    } catch (error) {
+      console.error("Error fetching image from TMDB:", error);
+      return null;
+    }
+  };
 
   const selectSuggestion = async (suggestion) => {
     setSearchTerm(suggestion.title);
@@ -76,19 +104,21 @@ function App() {
       title: suggestion.title,
       movieId: suggestion.id,
       avgRating: 4.5, // Placeholder rating, update this if you have actual rating data
-      imageUrl: imageUrl || "https://via.placeholder.com/185x278"
+      imageUrl: imageUrl || "https://via.placeholder.com/185x278",
     });
   };
 
   const searchMovie = async () => {
-    const foundMovie = movies.find(m => m.title.toLowerCase().includes(searchTerm.toLowerCase()));
+    const foundMovie = movies.find((m) =>
+      m.title.toLowerCase().includes(searchTerm.toLowerCase())
+    );
     if (foundMovie) {
       const imageUrl = await getImageFromTMDB(foundMovie.title);
       setMovie({
         title: foundMovie.title,
         movieId: foundMovie.id,
         avgRating: 4.5, // Placeholder rating, update this if you have actual rating data
-        imageUrl: imageUrl || "https://via.placeholder.com/185x278"
+        imageUrl: imageUrl || "https://via.placeholder.com/185x278",
       });
     } else {
       setMovie(null);
@@ -96,34 +126,15 @@ function App() {
   };
 
   const submitRating = () => {
-    console.log("Submitting rating:", userRating, "for movie:", movie ? movie.movieId : "No movie selected");
+    console.log(
+      "Submitting rating:",
+      userRating,
+      "for movie:",
+      movie ? movie.movieId : "No movie selected"
+    );
     fetch("/movies/" + movie.movieId + "/" + userRating);
     setUserRating(0);
     setHoverRating(0);
-  };
-
-  const fetchMostWatched = async () => {
-    const response = await fetch('/popular');
-    const data = await response.json();
-    const moviePromises = data.movies.map(async (movie) => {
-        const imageUrl = await getImageFromTMDB(movie.title);
-        return { ...movie, URL: imageUrl };
-    });
-
-    const movieCounter = await Promise.all(moviePromises);
-    setMostWatched(movieCounter);
-};
-
-  const fetchBestRated = async () => {
-    const response = await fetch('/prediction');
-    const data = await response.json();
-    const moviePromises = data.prediction.map(async (movie) => {
-        const imageUrl = await getImageFromTMDB(movie.title);
-        return { ...movie, URL: imageUrl };
-    })
-    const movieCounter = await Promise.all(moviePromises);
-    setBestRated(movieCounter);
-
   };
 
   return (
@@ -142,8 +153,11 @@ function App() {
             />
             <button onClick={() => searchMovie()}>Search</button>
             <ul className="suggestions-list">
-              {suggestions.map(suggestion => (
-                <li key={suggestion.id} onClick={() => selectSuggestion(suggestion)}>
+              {suggestions.map((suggestion) => (
+                <li
+                  key={suggestion.id}
+                  onClick={() => selectSuggestion(suggestion)}
+                >
                   {suggestion.title}
                 </li>
               ))}
@@ -157,7 +171,9 @@ function App() {
                   onClick={() => setUserRating(star)}
                   onMouseEnter={() => setHoverRating(star)}
                   onMouseLeave={() => setHoverRating(0)}
-                  className={`star ${star <= (hoverRating || userRating) ? 'active' : ''}`}
+                  className={`star ${
+                    star <= (hoverRating || userRating) ? "active" : ""
+                  }`}
                 >
                   ★
                 </span>
@@ -166,7 +182,12 @@ function App() {
             <button onClick={() => submitRating()}>Submit Rating</button>
           </div>
           <div className="movie-info">
-            <img src={movie ? movie.imageUrl : "https://via.placeholder.com/185x278"} alt={movie ? movie.title : "No movie selected"} />
+            <img
+              src={
+                movie ? movie.imageUrl : "https://via.placeholder.com/185x278"
+              }
+              alt={movie ? movie.title : "No movie selected"}
+            />
             {/* {movie && (
               <>
                 <p>Movie ID: {movie.movieId}</p>
@@ -179,10 +200,13 @@ function App() {
         <section className="most-watched-section">
           <h2>Most Watched Movies</h2>
           <div className="movie-list">
-            {mostWatched.map(movie => (
+            {mostWatched.map((movie) => (
               <div key={movie.id} className="movie-item">
-                <p>Watchcount: {movie.count}</p>
-                <img src={movie.URL || "https://via.placeholder.com/150x225"} alt={movie.id} />
+                <p className="counter">Views: {movie.count}</p>
+                <img
+                  src={movie.URL || "https://via.placeholder.com/150x225"}
+                  alt={movie.id}
+                />
                 <p>{movie.title}</p>
               </div>
             ))}
@@ -192,10 +216,13 @@ function App() {
         <section className="best-rated-section">
           <h2>Best Rated Movies</h2>
           <div className="movie-list">
-            {bestRated.map(movie => (
+            {bestRated.map((movie) => (
               <div key={movie.id} className="movie-item">
-                <p>Rating: {movie.score}</p>
-                <img src={movie.URL || "https://via.placeholder.com/150x225"} alt={movie.id} />
+                <p className="counter">Rating: {movie.score.toFixed(1)}</p>
+                <img
+                  src={movie.URL || "https://via.placeholder.com/150x225"}
+                  alt={movie.id}
+                />
                 <p>{movie.title}</p>
               </div>
             ))}

@@ -6,6 +6,8 @@
     --button-bg: #4a4a4a;
     --button-hover: #5a5a5a;
     --result-bg: #2a2a2a;
+    --primary-color: #3dd9ee;
+    --secondary-color: #FFD700;
 }
 
 body {
@@ -36,6 +38,10 @@ h1 {
     display: flex;
     justify-content: space-between;
     margin-bottom: 30px;
+    background-color: var(--result-bg);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
 .search-column {
@@ -46,12 +52,17 @@ h1 {
 .movie-info {
     flex: 1;
     text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .movie-info img {
-    width:40%;
+    width: 60%;
     height: auto;
     object-fit: contain;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
 .rating-input {
@@ -82,11 +93,22 @@ h1 {
     box-sizing: border-box;
     margin: 10px;
     text-align: center;
+    background-color: var(--result-bg);
+    padding: 10px;
+    border-radius: 10px;
+    transition: transform 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.movie-item:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
 }
 
 .movie-item img {
     width: 100%;
     height: auto;
+    border-radius: 5px;
 }
 
 .movie-item p {
@@ -120,19 +142,69 @@ button:hover {
     list-style-type: none;
     padding: 0;
     margin: 0;
-    max-height: 100px;
-    /* You can adjust this value */
+    max-height: 150px;
     overflow-y: auto;
-    /* Allows the list to scroll if it's too long */
+    background-color: var(--result-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 .suggestions-list li {
     cursor: pointer;
-    padding: 5px;
-    background: #000000;
-    margin: 2px 0;
+    padding: 10px;
+    border-bottom: 1px solid var(--input-border);
 }
 
 .suggestions-list li:hover {
-    background: #3dd9ee;
+    background: var(--primary-color);
+    color: var(--bg-color);
+}
+
+.counter {
+    background-color: var(--secondary-color);
+    color: var(--bg-color);
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 1.5em;
+    font-weight: bold;
+    text-align: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    margin: 10px 0;
+    width: fit-content;
+}
+
+/* Additional styles for a better layout */
+main {
+    padding: 20px;
+    background-color: var(--bg-color);
+}
+
+section {
+    margin-bottom: 30px;
+}
+
+.search-column input {
+    width: calc(100% - 110px);
+    display: inline-block;
+    margin-right: 10px;
+    padding-left: 35px;
+    /* To make space for the search icon */
+    /* background: url('data:image/svg+xml;base64,PHN2ZyBmaWxsPSIjM0Q5OUVFIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNiAxNiI+PHBhdGggZD0iTTEwLjE2OCA4LjY2NmwuMTgzLjE4MyAzLjgzMyAzLjgzM2EuNzUuNzUgMCAwMS0xLjA2IDEuMDZsLTMuODMzLTMuODMtLjE4My0uMTgzYTIuNTAyIDIuNTAyIDAgMTEtMS4yOC0xLjkzNiA1IDUgMCAxMTEuOTM2LTEuMjhsLjE4My0uMTgzIDMuODMzLTMuODMzYS43NS43NSAwMDExLjA2IDBsLTMuODMzIDMuODMzLS4xODMuMTgzem0tMS42MTQuMzQxYTQuMjUgNC4yNSAwMTEtMS43MDEgMi45MzYgNC4yNSA0LjI1IDAgMTEyLjkzNiAxLjcwbDEuMTI4LTEuMTI4QTUuNzUgNS43NSAwIDAwOS4wMjUgMS41YTQuMjUgNC4yNSAwMDEtLjAzMyAzLjVjLjQwMy4wNzguODIuMjA3IDEuMTI4LjQxNS43LjUwNyAxLjI1IDEuMjUyIDEuNTMxIDIuMDk2LjIwOC4zMDIuMzM3LjcyNS40MTUuMTEyLjE5LjI0My4zNzMuMzk2LjU0NmwzLjgzMyAzLjgzM2EuNzUuNzUgMCAwMTEuMDYtMS4wNmwtMy44MzMtMy44MzMtLjU0Ni0uNDE1Yy0uMTk3LS4xNDgtLjM0My0uMzMtLjUwNy0uNDYxYTQuMjUgNC4yNSAwMDAuMzg1LTMuNTczIDQuMjUgNC4yNSAwMTEtLjQwNSAxLjA4em0wIDBBMy4yNSAzLjI1IDAgMTE4LjUgOS4yNWEzLjI1IDMuMjUgMCAxMTMuMjUtMy4yNXoiLz48L3N2Zz4=') no-repeat scroll 10px 10px; */
+    background-size: 16px 16px;
+}
+
+.search-column button {
+    width: 90px;
+    display: inline-block;
+}
+
+.movie-info h2 {
+    margin: 20px 0;
+    color: var(--primary-color);
+}
+
+.rating-input label {
+    font-size: 1.2rem;
+    margin-right: 10px;
 }
