@@ -34,7 +34,6 @@ trackingMessageSchema = StructType() \
 
 # Convert value: binary -> JSON -> fields + parsed timestamp
 trackingMessages = kafkaMessages.select(
-    # Extract 'value' from Kafka message (i.e., the tracking data)
     from_json(
         column("value").cast("string"),
         trackingMessageSchema
@@ -52,7 +51,7 @@ trackingMessages = kafkaMessages.select(
   .withColumnRenamed('movieId', 'MovieID') \
   .withColumnRenamed('rating', 'Rating')
 
-# Compute most popular slides
+# Compute most popular movies
 popular_new = trackingMessages.groupBy(
     window(
         column("parsed_timestamp"),
