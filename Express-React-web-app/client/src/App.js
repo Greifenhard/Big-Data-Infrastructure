@@ -14,13 +14,13 @@ function App() {
 
     useEffect(() => {
         // Load Movie Dataset 
-        fetch("/movies.dat")
+        fetch("/movies.csv")
             .then((response) => response.text())
             .then((data) => {
             const parsedMovies = data
                 .split("\n")
                 .map((line) => {
-                const parts = line.split("::");
+                const parts = line.split(",");
                 if (parts.length === 3) {
                     const [id, title, genres] = parts;
                     return { id, title, genres };
@@ -31,6 +31,7 @@ function App() {
             setMovies(parsedMovies);
             })
             .catch((error) => console.error("Error loading the movie data:", error));
+
         // get Most Watched movies from backend (Database)
         const fetchMostWatched = async () => {
             const response = await fetch("/popular");
@@ -43,6 +44,7 @@ function App() {
             const movieCounter = await Promise.all(moviePromises);
             setMostWatched(movieCounter);
         };
+
         // get Best Rated Movies from Backend (Database)
         const fetchBestRated = async () => {
             const response = await fetch("/prediction");
@@ -99,6 +101,7 @@ function App() {
         return null;
       }
     };
+
     // Autocomplete feature with responsive click
     const selectSuggestion = async (suggestion) => {
         setSearchTerm(suggestion.title);
@@ -107,10 +110,11 @@ function App() {
         setMovie({
             title: suggestion.title,
             movieId: suggestion.id,
-            avgRating: 4.5, // Placeholder rating, update this if you have actual rating data
+            genres: suggestion.genres,
             imageUrl: imageUrl || "https://via.placeholder.com/185x278",
         });
     };
+
     // Method to search for movies 
     const searchMovie = async () => {
         const foundMovie = movies.find((m) =>
@@ -121,7 +125,7 @@ function App() {
             setMovie({
             title: foundMovie.title,
             movieId: foundMovie.id,
-            avgRating: 4.5, // Placeholder rating, update this if you have actual rating data
+            genres: foundMovie.genres,
             imageUrl: imageUrl || "https://via.placeholder.com/185x278",
             });
         } else {
@@ -142,10 +146,17 @@ function App() {
         setHoverRating(0);
     };
 
+    // For demonstration ONLY: generate UserContent for 30 Users for the first 200 movies with ratings
+    const generateUserContent = () => {
+        for (let i = 0; i < 30; i++) {
+            fetch("/movies/" + (Math.random()*100000).toFixed(0)%200 + "/" + (Math.random()*10000).toFixed(0)%6) 
+        }
+    };
+
     return (
     <div className="container">
         <header>
-        <h1>Movie Recommender System</h1>
+        <h1>Datawhispers Movierater</h1>
         </header>
         <main>
         <section className="search-section">
@@ -168,6 +179,7 @@ function App() {
                 ))}
             </ul>
             <h2>{movie ? movie.title : "No Movie Selected"}</h2>
+            <p>{movie ? movie.genres : ""}</p>
             <div className="rating-input">
                 <label>Your Rating: </label>
                 {[1, 2, 3, 4, 5].map((star) => (
@@ -183,6 +195,8 @@ function App() {
                 ))}
             </div>
             <button onClick={() => submitRating()}>Submit Rating</button>
+            <p></p>
+            <button onClick={() => generateUserContent()}>DEMO Only -- Generate Random UserInputs</button>
             </div>
             <div className="movie-info">
             <img

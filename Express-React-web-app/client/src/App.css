@@ -114,7 +114,6 @@ h1 {
 .movie-item p {
     word-wrap: break-word;
     white-space: pre-wrap;
-    /* Ensures long titles wrap onto the next line */
 }
 
 input,
@@ -174,7 +173,6 @@ button:hover {
     width: fit-content;
 }
 
-/* Additional styles for a better layout */
 main {
     padding: 20px;
     background-color: var(--bg-color);
@@ -195,7 +193,7 @@ section {
 }
 
 .search-column button {
-    width: 90px;
+    width: 130px;
     display: inline-block;
 }
 

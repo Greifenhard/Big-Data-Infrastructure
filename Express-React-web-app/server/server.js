@@ -3,7 +3,7 @@ const mariadb = require('mariadb')
 const express = require('express')
 const app = express()
 
-const UserId = Math.round(Math.random()*1000000000)%200000+1 // user has specific userId, that changes whenever he starts the application
+const UserId = (Math.random()*1000000000).toFixed(0) // user has specific userId, that changes whenever he starts the application
 
 app.get("/popular", (req, res) => {
     const topX = 5;
@@ -20,7 +20,7 @@ app.get("/popular", (req, res) => {
 
 app.get("/prediction", (req, res) => {
     const topX = 5;
-    getPrediction(topX).then(values => {
+    getAvgRating(topX).then(values => {
         const convertedValues = values.map(value => ({
             id: value.id,
             title: value.title,
@@ -42,7 +42,7 @@ app.get("/movies/:movieId/:rating", (req, res) => {
         movieId:Number(movieId),
         rating:Number(rating),
         timestamp: Math.floor(new Date() / 1000)
-    }).then(() => console.log(`Sent movieId=${movieId} with rating=${rating} to kafka topic=movie-events`))
+    }).then(() => console.log(`Sent movieId=${movieId} with rating=${rating} from user=${UserId} to kafka topic=movie-events`))
         .catch(e => console.log("Error sending to kafka", e))
 
 });
@@ -68,7 +68,6 @@ async function sendTrackingMessage(data) {
     });
     await producer.disconnect();
 }
-
 
 // -------------------------------------------------------
 // Database Configuration
@@ -105,8 +104,9 @@ async function getPopular(maxCount) {
 		.map(row => ({ id: row?.[0], title: row?.[1] ,count: row?.[2] }))
 }
 
-async function getPrediction(maxCount) {
-	const query = "SELECT * FROM prediction ORDER BY avg_prediction DESC LIMIT ?"
+// Get best rated movies (from db only)
+async function getAvgRating(maxCount) {
+	const query = "SELECT * FROM rating ORDER BY avg_rating DESC LIMIT ?";
 	return (await executeQuery(query, [maxCount]))
 		.map(row => ({ id: row?.[0], title: row?.[1] , score: row?.[2] }))
 }

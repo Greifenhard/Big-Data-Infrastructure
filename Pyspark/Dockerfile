@@ -58,7 +58,7 @@ WORKDIR /app
 COPY --chown=spark:spark *.py /app/
 
 # Copy data
-COPY MovieLens-1Mil-Dataset/* /app/MovieLens-1Mil-Dataset/
+COPY ml-25m/* /app/ml-25m/
 
 ENTRYPOINT /opt/bitnami/spark/bin/spark-submit \
 	--master local \

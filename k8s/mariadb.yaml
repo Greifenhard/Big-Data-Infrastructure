@@ -8,13 +8,14 @@ data:
 
     CREATE TABLE `popular` (
       `MovieID` INT PRIMARY KEY,
+      `MovieTitle` VARCHAR(40),
       `count` BIGINT
     );
 
-    CREATE TABLE `prediction` (
+    CREATE TABLE `rating` (
       `MovieID` INT PRIMARY KEY,
-      `UserID` INT NOT NULL, 
-      `Score` DOUBLE
+      `MovieTitle` VARCHAR(40),
+      `avg_rating` DOUBLE
     );
 
 ---
