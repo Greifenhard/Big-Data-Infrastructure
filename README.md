@@ -4,16 +4,17 @@ This project is implemented for the course Big Data in the Coperative State Univ
 
 ## Team members
 
-:bust_in_silhouette: Michael Greif - 
+👤 Michael Greif - 5658606
 
-:bust_in_silhouette: German Paul - 9973152
+👤 German Paul - 9973152
 
-:bust_in_silhouette: Lukas Moosmann - 3805562
+👤 Lukas Moosmann - 3805562
 
-:bust_in_silhouette: Nico Dobberkau - 
-
+👤 Nico Dobberkau -
 
 ## Tech stack
+
+![alt text](./ReadMe%20images/techstack.svg)
 
 ![Worklfow Manager](https://img.shields.io/badge/workflow%20manager%20for%20containerized%20development-D6EFD8?style=for-the-badge) [![Skaffold](https://img.shields.io/badge/skaffold-white?style=for-the-badge&logo=skaffold)](https://skaffold.dev/)
 
@@ -33,12 +34,13 @@ This project is implemented for the course Big Data in the Coperative State Univ
 
 ## Folder structure
 
-```
+```bash
 📦root directory
  ┣ 📂Express-React-web-app
  ┃ ┣ 📂client
  ┃ ┃ ┣ 📜Dockerfile for the Frontend
- ┃ ┃ ┣ 📜React Frontend
+ ┃ ┃ ┣ 📂src
+ ┃ ┃ ┃ ┣ 📜 React Frontend
  ┃ ┣ 📂server
  ┃ ┃ ┣ 📜Dockerfile for the server (backend)
  ┃ ┃ ┣ 📜All backend functionality inside server.js
@@ -61,10 +63,12 @@ This project is implemented for the course Big Data in the Coperative State Univ
 ## Setup
 
 ### Prerequisite
-You need to have kafka in your kubernetes (Minikube).\n
-Please have atleast 4 CPUs and 5000 MB Memory for Kafka to work without issues
+
+You need to have kafka in your kubernetes (Minikube).
+Please have atleast 2 CPUs and 5000 MB Memory for Kafka to work without issues in minikube.
 
 1. Run the strimzi operator
+
 ```bash
 # Add helm repository
 helm repo add strimzi http://strimzi.io/charts/
@@ -76,60 +80,24 @@ helm status my-kafka-operator 2>&1 >>/dev/null 2>&1 || \
 ```
 
 2. Deploy the cluster
+
 ```bash
 kubectl apply -f https://raw.githubusercontent.com/strimzi/strimzi-kafka-operator/0.41.0/examples/kafka/kafka-ephemeral-single.yaml
 ```
 
-### How to run locally without Minikube
-
-1. start webserver
-```bash
-cd Express-React-web-app
-cd server
-npm i
-npm run dev
-```
-2. start backend
-```bash
-cd Express-React-web-app
-cd client
-npm i
-npm start
-```
-
-3. start kafka-container
-```bash
-cd Kafka-container
-docker-compose up -d
-```
-
-4. start pyspark
-```bash
-cd Pyspark
-docker build -t spark_test .
-docker run -it --rm --net=host spark_test
-```
-
 ### How to run with minikube
 
-1. You need the kafka Cluster in your minikube see #Prerequisite
-
+1. You need the kafka Cluster in your minikube see [Prerequesite](#prerequisite)
 2. Run Skaffold and build the project
+
 ```bash
 skaffold dev
 ```
 
 3. Get our Webapp via Tunneling
+
 ```bash
 minikube service client-service
-```
-
-### How to show kafka DataStream
-If Kafka is running, enter the current container and listen to the data-input-stream.
-```bash
-docker exec -it <container-id> bash
-
-/opt/kafka/bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic movie_events --from-beginning
 ```
 
 ## Demo
