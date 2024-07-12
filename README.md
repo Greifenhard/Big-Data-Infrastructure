@@ -55,6 +55,7 @@ This project is implemented for the course Big Data in the Coperative State Univ
  ┃ ┃ ┣ 📜Movie Dataset
  ┃ ┣ 📜Dockerfile for model creation
  ┃ ┣ 📜PySpark Model
+ ┣ 📂ReadMe images
  ┣ 📜README
  ┣ 📜files to be ignored by git
  ┗ 📜skaffold initializer
@@ -106,7 +107,55 @@ minikube service client-service
 
 ## Implementation and Functionality
 
-Description of how the system works
+### Overview
+
+This project is based on the general structure of a Kappa architecture in the big data engineering context, whereby this application specializes in the search and rating of films. The user can select a movie in the movie search and gets a short information about its genre, as well as the possibility to rate it from 0 - 5 stars. If the user rates one movie, this data is loaded in real time from the React frontend to the Node backend server and stored from there in Kafka with a timestamp. From this data ingestion layer, the existing data is now evaluated in the processing layer with batch processing from Apache Spark (Pyspark). This evaluation calculates the number of views that a movie has generated as well as the current user rating, which is calculated on the basis of all user ratings. These results are stored in a MariaDB as a serving layer and fed back to the node backend so that they can be sorted and displayed in the application. All parts are containerized with Docker and deployed by skaffold in a minikube cluster.
+
+### Data Ingestion Layer
+
+The data ingestion layer comprises the components of the frontend (React), the backend (Node + Express) and a Kafka cluster from Strimzi. If a movie is rated by the user, the information "MovieID" and "Rating" is forwarded to the backend via an Express API in the URL and processed there. Here, the current "UserID" and a timestamp are also written to the "movie-events" kafkatopic in Json format. Upon successful execution, a corresponding console output is displayed.
+
+```javascript
+app.get("/movies/:movieId/:rating", (req, res) => {
+    let movieId = req.params['movieId']
+    let rating = req.params['rating']
+  
+    sendTrackingMessage({
+        userId:Number(UserId),
+        movieId:Number(movieId),
+        rating:Number(rating),
+        timestamp: Math.floor(new Date() / 1000)
+    }).then(() => console.log(`Sent movieId=${movieId} with rating=${rating} from user=${UserId} to kafka topic=movie-events`))
+        .catch(e => console.log("Error sending to kafka", e))
+
+});
+```
+
+The kafka connection is established through Javascript Library "KafkaJs".
+
+```javascript
+const kafka = new Kafka({
+    clientId: UserId,
+    brokers: ["my-cluster-kafka-bootstrap:9092"],
+})
+
+const producer = kafka.producer({ createPartitioner: Partitioners.LegacyPartitioner })
+
+async function sendTrackingMessage(data) {
+    await producer.connect();
+    await producer.send({
+        topic: 'movie-events',
+        messages: [
+            { value: JSON.stringify(data) }
+        ],
+    });
+    await producer.disconnect();
+}
+```
+
+### Processing Layer
+
+### Serving Layer
 
 ## Achievments, Obstacles and Outlook
 

@@ -52,7 +52,7 @@ app.get("/movies/:movieId/:rating", (req, res) => {
 // -------------------------------------------------------
 
 const kafka = new Kafka({
-    clientId: 'selfBiasedClusterYDoICode', // Hier muss noch ein anderer Name hin
+    clientId: UserId,
     brokers: ["my-cluster-kafka-bootstrap:9092"],
 })
 
