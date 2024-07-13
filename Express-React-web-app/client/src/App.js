@@ -47,7 +47,7 @@ function App() {
 
         // get Best Rated Movies from Backend (Database)
         const fetchBestRated = async () => {
-            const response = await fetch("/prediction");
+            const response = await fetch("/avgrating");
             const data = await response.json();
             const moviePromises = data.prediction.map(async (movie) => {
             const imageUrl = await getImageFromTMDB(movie.title);

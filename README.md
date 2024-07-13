@@ -155,7 +155,59 @@ async function sendTrackingMessage(data) {
 
 ### Processing Layer
 
+Batches are used to process the Kafka stream, the data of which is used in Pyspark to count the number of movies watched and to calculate the average rating for each movie. These results are written with JDBC to our datastorage, which is provided via a MariaDB in the Kubernetes cluster.
+
+```python-repl
+# Compute most popular movies
+popular = trackingMessages.groupBy(
+    window(
+        column("parsed_timestamp"),
+        windowDuration,
+        slidingDuration
+    ),
+    column("MovieID")
+).count() \
+ .withColumnRenamed('window.start', 'window_start') \
+ .withColumnRenamed('window.end', 'window_end')
+
+# Load movies dataset
+movies = spark.read.csv("ml-25m/movies.csv", sep=",", schema='MovieID int, MovieTitle string, Genre string')
+
+# Join Tables with Movies on MovieID
+AverageRating = trackingMessages.join(movies, on="MovieID")
+popular = popular.join(movies, on="MovieID")
+
+# Aggregate and sort Average Ratings
+top_results = AverageRating.groupBy("MovieID", "MovieTitle", "Genre").agg(
+    avg("Rating").alias("avg_rating")
+).orderBy("avg_rating", ascending=False)
+```
+
 ### Serving Layer
+
+The stored data from MariaDB can now be retrieved from the node backend using SQL queries and finally sent back to the React frontend via the Express API.
+
+```javascript
+app.get("/avgrating", (req, res) => {
+    const topX = 5;
+    getAvgRating(topX).then(values => {
+        const convertedValues = values.map(value => ({
+            id: value.id,
+            title: value.title,
+            score: Number(value.score)
+        }));
+        console.log(convertedValues)
+        res.send({"prediction": convertedValues})
+    })
+});
+
+// Get best rated movies (from db only)
+async function getAvgRating(maxCount) {
+	const query = "SELECT * FROM rating ORDER BY avg_rating DESC LIMIT ?";
+	return (await executeQuery(query, [maxCount]))
+		.map(row => ({ id: row?.[0], title: row?.[1] , score: row?.[2] }))
+}
+```
 
 ## Achievments, Obstacles and Outlook
 

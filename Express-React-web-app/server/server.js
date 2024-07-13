@@ -18,7 +18,7 @@ app.get("/popular", (req, res) => {
     })
 });
 
-app.get("/prediction", (req, res) => {
+app.get("/avgrating", (req, res) => {
     const topX = 5;
     getAvgRating(topX).then(values => {
         const convertedValues = values.map(value => ({
