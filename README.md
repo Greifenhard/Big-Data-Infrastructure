@@ -10,7 +10,7 @@ This project is implemented for the course Big Data in the Coperative State Univ
 
 👤 Lukas Moosmann - 3805562
 
-👤 Nico Dobberkau -
+👤 Nico Dobberkau - 
 
 ## Tech stack
 
@@ -103,7 +103,7 @@ minikube service client-service
 
 ## Demo
 
-[![Big Data Demo](https://markdown-videos-api.jorgenkh.no/url?url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3DVtYL33UXvco)](https://www.youtube.com/watch?v=VtYL33UXvco)
+[![Big Data Demo](https://markdown-videos-api.jorgenkh.no/url?url=https%3A%2F%2Fyoutu.be%2FL6LOPi84rG8)](https://youtu.be/L6LOPi84rG8)
 
 ## Implementation and Functionality
 
