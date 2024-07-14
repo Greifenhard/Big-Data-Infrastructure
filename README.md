@@ -10,7 +10,7 @@ This project is implemented for the course Big Data in the Coperative State Univ
 
 👤 Lukas Moosmann - 3805562
 
-👤 Nico Dobberkau - 
+👤 Nico Dobberkau - 7010195
 
 ## Tech stack
 
