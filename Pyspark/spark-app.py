@@ -2,8 +2,6 @@ from pyspark.sql import SparkSession
 from pyspark.sql.functions import *
 from pyspark.sql.types import IntegerType, StructType, TimestampType
 
-from pyspark.ml.recommendation import ALS
-
 windowDuration = '1 minute'
 slidingDuration = '1 minute'
 

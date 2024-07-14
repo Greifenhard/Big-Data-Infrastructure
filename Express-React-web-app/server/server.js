@@ -35,8 +35,6 @@ app.get("/movies/:movieId/:rating", (req, res) => {
     let movieId = req.params['movieId']
     let rating = req.params['rating']
     
-    res.json({"id":[movieId]})
-    
     sendTrackingMessage({
         userId:Number(UserId),
         movieId:Number(movieId),
